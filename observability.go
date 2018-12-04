@@ -73,7 +73,7 @@ type spanWithMetrics struct {
 
 func roundtripTrackingSpan(ctx context.Context, methodName string, traceOpts ...trace.StartOption) (context.Context, *spanWithMetrics) {
 	ctx, span := trace.StartSpan(ctx, methodName, traceOpts...)
-	return ctx, &spanWithMetrics{span: span, startTime: time.Now()}
+	return ctx, &spanWithMetrics{span: span, startTime: time.Now(), method: methodName}
 }
 
 func (swm *spanWithMetrics) setError(err error) {

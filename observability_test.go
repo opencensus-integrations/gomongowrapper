@@ -117,7 +117,7 @@ func TestUnitRoundtripTrackingOperation(t *testing.T) {
 	} else {
 		r0 := vdLatency.Rows[0]
 		// We need to have the row with the tag "error" since we ended with an error"
-		wantTags := []tag.Tag{{Key: keyError, Value: errMsg}}
+		wantTags := []tag.Tag{{Key: keyError, Value: errMsg}, {Key: keyMethod, Value: "a.b.c/D.Foo"}}
 		if !reflect.DeepEqual(wantTags, r0.Tags) {
 			t.Errorf("Latency.ViewData.Rows[0].Tags mismatch\nGot: %#v\nWant:%#v\n", r0.Tags, wantTags)
 		}
@@ -151,7 +151,7 @@ func TestUnitRoundtripTrackingOperation(t *testing.T) {
 		t.Errorf("Calls.ViewdAta.Rows: Got %d Wanted %d", g, w)
 	} else {
 		r0 := vdCalls.Rows[0]
-		wantTags := []tag.Tag{{Key: keyError, Value: errMsg}}
+		wantTags := []tag.Tag{{Key: keyError, Value: errMsg}, {Key: keyMethod, Value: "a.b.c/D.Foo"}}
 		if !reflect.DeepEqual(wantTags, r0.Tags) {
 			t.Errorf("Calls.ViewData.Rows[0].Tags mismatch\nGot: %#v\nWant:%#v\n", r0.Tags, wantTags)
 		}
