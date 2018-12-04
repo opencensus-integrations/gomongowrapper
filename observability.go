@@ -33,16 +33,19 @@ var (
 
 var mLatencyMs = stats.Float64("latency", "The latency in milliseconds", "ms")
 
+var latencyDistribution = view.Distribution(
+	// [0ms, 0.001ms, 0.005ms, 0.01ms, 0.05ms, 0.1ms, 0.5ms, 1ms, 1.5ms, 2ms, 2.5ms, 5ms, 10ms, 25ms, 50ms, 100ms, 200ms,
+	//      400ms, 600ms, 800ms, 1s, 1.5s, 2s, 2.5s, 5s, 10s, 20s, 40s, 100s, 200s, 500s, 1000s]
+	//
+	0, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 1.5, 2, 2.5, 5, 10, 25, 50, 100, 200,
+	400, 600, 800, 1000, 1500, 2000, 2500, 5000, 10000, 20000, 40000, 100000, 200000, 500000, 1000000)
+
 var allViews = []*view.View{
 	{
 		Name: "mongo/client/latency", Description: "The latency of the various calls",
-		Measure: mLatencyMs,
-		// [0ms, 0.001ms, 0.005ms, 0.01ms, 0.05ms, 0.1ms, 0.5ms, 1ms, 1.5ms, 2ms, 2.5ms, 5ms, 10ms, 25ms, 50ms, 100ms, 200ms,
-		//      400ms, 600ms, 800ms, 1s, 1.5s, 2s, 2.5s, 5s, 10s, 20s, 40s, 100s, 200s, 500s, 1000s]
-		//
-		Aggregation: view.Distribution(0, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 1.5, 2, 2.5, 5, 10, 25, 50, 100, 200,
-			400, 600, 800, 1000, 1500, 2000, 2500, 5000, 10000, 20000, 40000, 100000, 200000, 500000, 1000000),
-		TagKeys: []tag.Key{keyMethod, keyStatus, keyError},
+		Measure:     mLatencyMs,
+		Aggregation: latencyDistribution,
+		TagKeys:     []tag.Key{keyMethod, keyStatus, keyError},
 	},
 	{
 		Name: "mongo/client/calls", Description: "The various calls",
@@ -68,8 +71,8 @@ type spanWithMetrics struct {
 	endOnce   sync.Once
 }
 
-func roundtripTrackingSpan(ctx context.Context, methodName string) (context.Context, *spanWithMetrics) {
-	ctx, span := trace.StartSpan(ctx, methodName)
+func roundtripTrackingSpan(ctx context.Context, methodName string, traceOpts ...trace.StartOption) (context.Context, *spanWithMetrics) {
+	ctx, span := trace.StartSpan(ctx, methodName, traceOpts...)
 	return ctx, &spanWithMetrics{span: span, startTime: time.Now()}
 }
 
