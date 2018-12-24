@@ -22,22 +22,22 @@ import (
 	"github.com/mongodb/mongo-go-driver/mongo/transactionopt"
 )
 
-type wrappedSession struct {
+type WrappedSession struct {
 	ss mongo.Session
 }
 
-func (ws *wrappedSession) EndSession(ctx context.Context) {
+func (ws *WrappedSession) EndSession(ctx context.Context) {
 	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Session.EndSession")
 	defer span.end(ctx)
 
 	ws.ss.EndSession(ctx)
 }
 
-func (ws *wrappedSession) StartTransaction(topts ...transactionopt.Transaction) error {
+func (ws *WrappedSession) StartTransaction(topts ...transactionopt.Transaction) error {
 	return ws.ss.StartTransaction(topts...)
 }
 
-func (ws *wrappedSession) AbortTransaction(ctx context.Context) error {
+func (ws *WrappedSession) AbortTransaction(ctx context.Context) error {
 	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Session.AbortTransaction")
 	defer span.end(ctx)
 
@@ -48,7 +48,7 @@ func (ws *wrappedSession) AbortTransaction(ctx context.Context) error {
 	return err
 }
 
-func (ws *wrappedSession) CommitTransaction(ctx context.Context) error {
+func (ws *WrappedSession) CommitTransaction(ctx context.Context) error {
 	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Session.CommitTransaction")
 	defer span.end(ctx)
 
@@ -59,6 +59,6 @@ func (ws *wrappedSession) CommitTransaction(ctx context.Context) error {
 	return err
 }
 
-func (ws *wrappedSession) ClusterTime() *bson.Document {
+func (ws *WrappedSession) ClusterTime() *bson.Document {
 	return ws.ss.ClusterTime()
 }
