@@ -53,8 +53,8 @@ func Example() {
 	ctx, span := trace.StartSpan(context.Background(), "Fetch", trace.WithSampler(trace.AlwaysSample()))
 	defer span.End()
 
-        // Now for the mongo connections, using the context
-        // with the span in it for continuity.
+	// Now for the mongo connections, using the context
+	// with the span in it for continuity.
 	client, err := mongowrapper.NewClient("mongodb://localhost:27017")
 	if err != nil {
 		log.Fatalf("Failed to create the new client: %v", err)
