@@ -27,7 +27,7 @@ type wrappedSession struct {
 }
 
 func (ws *wrappedSession) EndSession(ctx context.Context) {
-	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Client.EndSession")
+	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Session.EndSession")
 	defer span.end(ctx)
 
 	ws.ss.EndSession(ctx)
@@ -38,11 +38,18 @@ func (ws *wrappedSession) StartTransaction(topts ...transactionopt.Transaction) 
 }
 
 func (ws *wrappedSession) AbortTransaction(ctx context.Context) error {
-	return ws.ss.AbortTransaction(ctx)
+	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Session.AbortTransaction")
+	defer span.end(ctx)
+
+	err := ws.ss.AbortTransaction(ctx)
+	if err != nil {
+		span.setError(err)
+	}
+	return err
 }
 
 func (ws *wrappedSession) CommitTransaction(ctx context.Context) error {
-	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Client.EndSession")
+	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Session.CommitTransaction")
 	defer span.end(ctx)
 
 	err := ws.ss.CommitTransaction(ctx)
