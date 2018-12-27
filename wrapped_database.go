@@ -18,15 +18,11 @@ import (
 	"context"
 	"sync"
 
-	"github.com/mongodb/mongo-go-driver/bson"
-	"github.com/mongodb/mongo-go-driver/core/readconcern"
-	"github.com/mongodb/mongo-go-driver/core/readpref"
-	"github.com/mongodb/mongo-go-driver/core/writeconcern"
 	"github.com/mongodb/mongo-go-driver/mongo"
-	"github.com/mongodb/mongo-go-driver/mongo/collectionopt"
-	"github.com/mongodb/mongo-go-driver/mongo/dbopt"
-	"github.com/mongodb/mongo-go-driver/mongo/listcollectionopt"
-	"github.com/mongodb/mongo-go-driver/mongo/runcmdopt"
+	"github.com/mongodb/mongo-go-driver/mongo/options"
+	"github.com/mongodb/mongo-go-driver/mongo/readconcern"
+	"github.com/mongodb/mongo-go-driver/mongo/readpref"
+	"github.com/mongodb/mongo-go-driver/mongo/writeconcern"
 )
 
 type WrappedDatabase struct {
@@ -45,7 +41,7 @@ func (wd *WrappedDatabase) Client() *WrappedClient {
 	return &WrappedClient{cc: cc}
 }
 
-func (wd *WrappedDatabase) Collection(name string, opts ...collectionopt.Option) *WrappedCollection {
+func (wd *WrappedDatabase) Collection(name string, opts ...*options.CollectionOptions) *WrappedCollection {
 	if wd.db == nil {
 		return nil
 	}
@@ -56,18 +52,18 @@ func (wd *WrappedDatabase) Collection(name string, opts ...collectionopt.Option)
 	return &WrappedCollection{coll: coll}
 }
 
-func (wd *WrappedDatabase) Drop(ctx context.Context, opts ...dbopt.DropDB) error {
+func (wd *WrappedDatabase) Drop(ctx context.Context) error {
 	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Database.Drop")
 	defer span.end(ctx)
 
-	err := wd.db.Drop(ctx, opts...)
+	err := wd.db.Drop(ctx)
 	if err != nil {
 		span.setError(err)
 	}
 	return err
 }
 
-func (wd *WrappedDatabase) ListCollections(ctx context.Context, filter *bson.Document, opts ...listcollectionopt.ListCollections) (mongo.Cursor, error) {
+func (wd *WrappedDatabase) ListCollections(ctx context.Context, filter interface{}, opts ...*options.ListCollectionsOptions) (mongo.Cursor, error) {
 	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Database.ListCollections")
 	defer span.end(ctx)
 
@@ -82,15 +78,11 @@ func (wd *WrappedDatabase) Name() string                          { return wd.db
 func (wd *WrappedDatabase) ReadConcern() *readconcern.ReadConcern { return wd.db.ReadConcern() }
 func (wd *WrappedDatabase) ReadPreference() *readpref.ReadPref    { return wd.db.ReadPreference() }
 
-func (wd *WrappedDatabase) RunCommand(ctx context.Context, runCommand interface{}, opts ...runcmdopt.Option) (bson.Raw, error) {
+func (wd *WrappedDatabase) RunCommand(ctx context.Context, runCommand interface{}, opts ...*options.RunCmdOptions) *mongo.SingleResult {
 	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Database.RunCommand")
 	defer span.end(ctx)
 
-	raw, err := wd.db.RunCommand(ctx, runCommand, opts...)
-	if err != nil {
-		span.setError(err)
-	}
-	return raw, err
+	return wd.db.RunCommand(ctx, runCommand, opts...)
 }
 
 func (wd *WrappedDatabase) WriteConcern() *writeconcern.WriteConcern { return wd.db.WriteConcern() }

@@ -17,12 +17,10 @@ package mongowrapper
 import (
 	"context"
 
-	"github.com/mongodb/mongo-go-driver/core/readpref"
-	"github.com/mongodb/mongo-go-driver/core/session"
 	"github.com/mongodb/mongo-go-driver/mongo"
-	"github.com/mongodb/mongo-go-driver/mongo/dbopt"
-	"github.com/mongodb/mongo-go-driver/mongo/listdbopt"
-	"github.com/mongodb/mongo-go-driver/mongo/sessionopt"
+	"github.com/mongodb/mongo-go-driver/mongo/options"
+	"github.com/mongodb/mongo-go-driver/mongo/readpref"
+	"github.com/mongodb/mongo-go-driver/x/mongo/driver/session"
 )
 
 type WrappedClient struct {
@@ -50,7 +48,7 @@ func (wc *WrappedClient) Connect(ctx context.Context) error {
 
 func (wc *WrappedClient) ConnectionString() string { return wc.cc.ConnectionString() }
 
-func (wc *WrappedClient) Database(name string, opts ...dbopt.Option) *WrappedDatabase {
+func (wc *WrappedClient) Database(name string, opts ...*options.DatabaseOptions) *WrappedDatabase {
 	db := wc.cc.Database(name, opts...)
 	if db == nil {
 		return nil
@@ -69,7 +67,7 @@ func (wc *WrappedClient) Disconnect(ctx context.Context) error {
 	return err
 }
 
-func (wc *WrappedClient) ListDatabaseNames(ctx context.Context, filter interface{}, opts ...listdbopt.ListDatabases) ([]string, error) {
+func (wc *WrappedClient) ListDatabaseNames(ctx context.Context, filter interface{}, opts ...*options.ListDatabasesOptions) ([]string, error) {
 	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Client.ListDatabaseNames")
 	defer span.end(ctx)
 
@@ -80,7 +78,7 @@ func (wc *WrappedClient) ListDatabaseNames(ctx context.Context, filter interface
 	return dbs, err
 }
 
-func (wc *WrappedClient) ListDatabases(ctx context.Context, filter interface{}, opts ...listdbopt.ListDatabases) (mongo.ListDatabasesResult, error) {
+func (wc *WrappedClient) ListDatabases(ctx context.Context, filter interface{}, opts ...*options.ListDatabasesOptions) (mongo.ListDatabasesResult, error) {
 	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Client.ListDatabases")
 	defer span.end(ctx)
 
@@ -102,15 +100,19 @@ func (wc *WrappedClient) Ping(ctx context.Context, rp *readpref.ReadPref) error 
 	return err
 }
 
-func (wc *WrappedClient) StartSession(opts ...sessionopt.Session) (mongo.Session, error) {
-	return wc.cc.StartSession(opts...)
+func (wc *WrappedClient) StartSession(opts ...*options.SessionOptions) (mongo.Session, error) {
+	ss, err := wc.cc.StartSession(opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &WrappedSession{Session: ss}, nil
 }
 
 func (wc *WrappedClient) UseSession(ctx context.Context, fn func(mongo.SessionContext) error) error {
 	return wc.cc.UseSession(ctx, fn)
 }
 
-func (wc *WrappedClient) UseSessionWithOptions(ctx context.Context, opts []sessionopt.Session, fn func(mongo.SessionContext) error) error {
+func (wc *WrappedClient) UseSessionWithOptions(ctx context.Context, opts *options.SessionOptions, fn func(mongo.SessionContext) error) error {
 	return wc.cc.UseSessionWithOptions(ctx, opts, fn)
 }
 

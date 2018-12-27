@@ -18,25 +18,14 @@ import (
 	"context"
 
 	"github.com/mongodb/mongo-go-driver/mongo"
-	"github.com/mongodb/mongo-go-driver/mongo/aggregateopt"
-	"github.com/mongodb/mongo-go-driver/mongo/bulkwriteopt"
-	"github.com/mongodb/mongo-go-driver/mongo/changestreamopt"
-	"github.com/mongodb/mongo-go-driver/mongo/collectionopt"
-	"github.com/mongodb/mongo-go-driver/mongo/countopt"
-	"github.com/mongodb/mongo-go-driver/mongo/deleteopt"
-	"github.com/mongodb/mongo-go-driver/mongo/distinctopt"
-	"github.com/mongodb/mongo-go-driver/mongo/dropcollopt"
-	"github.com/mongodb/mongo-go-driver/mongo/findopt"
-	"github.com/mongodb/mongo-go-driver/mongo/insertopt"
-	"github.com/mongodb/mongo-go-driver/mongo/replaceopt"
-	"github.com/mongodb/mongo-go-driver/mongo/updateopt"
+	"github.com/mongodb/mongo-go-driver/mongo/options"
 )
 
 type WrappedCollection struct {
 	coll *mongo.Collection
 }
 
-func (wc *WrappedCollection) Aggregate(ctx context.Context, pipeline interface{}, opts ...aggregateopt.Aggregate) (mongo.Cursor, error) {
+func (wc *WrappedCollection) Aggregate(ctx context.Context, pipeline interface{}, opts ...*options.AggregateOptions) (mongo.Cursor, error) {
 	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Collection.Aggregate")
 	defer span.end(ctx)
 
@@ -47,7 +36,7 @@ func (wc *WrappedCollection) Aggregate(ctx context.Context, pipeline interface{}
 	return cur, err
 }
 
-func (wc *WrappedCollection) BulkWrite(ctx context.Context, models []mongo.WriteModel, opts ...bulkwriteopt.BulkWrite) (*mongo.BulkWriteResult, error) {
+func (wc *WrappedCollection) BulkWrite(ctx context.Context, models []mongo.WriteModel, opts ...*options.BulkWriteOptions) (*mongo.BulkWriteResult, error) {
 	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Collection.BulkWrite")
 	defer span.end(ctx)
 
@@ -58,11 +47,11 @@ func (wc *WrappedCollection) BulkWrite(ctx context.Context, models []mongo.Write
 	return bwres, err
 }
 
-func (wc *WrappedCollection) Clone(opts ...collectionopt.Option) (*mongo.Collection, error) {
+func (wc *WrappedCollection) Clone(opts ...*options.CollectionOptions) (*mongo.Collection, error) {
 	return wc.coll.Clone(opts...)
 }
 
-func (wc *WrappedCollection) Count(ctx context.Context, filter interface{}, opts ...countopt.Count) (int64, error) {
+func (wc *WrappedCollection) Count(ctx context.Context, filter interface{}, opts ...*options.CountOptions) (int64, error) {
 	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Collection.Count")
 	defer span.end(ctx)
 
@@ -73,7 +62,7 @@ func (wc *WrappedCollection) Count(ctx context.Context, filter interface{}, opts
 	return count, err
 }
 
-func (wc *WrappedCollection) CountDocuments(ctx context.Context, filter interface{}, opts ...countopt.Count) (int64, error) {
+func (wc *WrappedCollection) CountDocuments(ctx context.Context, filter interface{}, opts ...*options.CountOptions) (int64, error) {
 	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Collection.CountDocuments")
 	defer span.end(ctx)
 
@@ -86,7 +75,7 @@ func (wc *WrappedCollection) CountDocuments(ctx context.Context, filter interfac
 
 func (wc *WrappedCollection) Database() *mongo.Database { return wc.coll.Database() }
 
-func (wc *WrappedCollection) DeleteMany(ctx context.Context, filter interface{}, opts ...deleteopt.Delete) (*mongo.DeleteResult, error) {
+func (wc *WrappedCollection) DeleteMany(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
 	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Collection.DeleteMany")
 	defer span.end(ctx)
 
@@ -97,7 +86,7 @@ func (wc *WrappedCollection) DeleteMany(ctx context.Context, filter interface{},
 	return dmres, err
 }
 
-func (wc *WrappedCollection) DeleteOne(ctx context.Context, filter interface{}, opts ...deleteopt.Delete) (*mongo.DeleteResult, error) {
+func (wc *WrappedCollection) DeleteOne(ctx context.Context, filter interface{}, opts ...*options.DeleteOptions) (*mongo.DeleteResult, error) {
 	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Collection.DeleteOne")
 	defer span.end(ctx)
 
@@ -108,7 +97,7 @@ func (wc *WrappedCollection) DeleteOne(ctx context.Context, filter interface{}, 
 	return dor, err
 }
 
-func (wc *WrappedCollection) Distinct(ctx context.Context, fieldName string, filter interface{}, opts ...distinctopt.Distinct) ([]interface{}, error) {
+func (wc *WrappedCollection) Distinct(ctx context.Context, fieldName string, filter interface{}, opts ...*options.DistinctOptions) ([]interface{}, error) {
 	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Collection.Distinct")
 	defer span.end(ctx)
 
@@ -119,18 +108,18 @@ func (wc *WrappedCollection) Distinct(ctx context.Context, fieldName string, fil
 	return distinct, err
 }
 
-func (wc *WrappedCollection) Drop(ctx context.Context, opts ...dropcollopt.DropColl) error {
+func (wc *WrappedCollection) Drop(ctx context.Context) error {
 	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Collection.Drop")
 	defer span.end(ctx)
 
-	err := wc.coll.Drop(ctx, opts...)
+	err := wc.coll.Drop(ctx)
 	if err != nil {
 		span.setError(err)
 	}
 	return err
 }
 
-func (wc *WrappedCollection) EstimatedDocumentCount(ctx context.Context, opts ...countopt.EstimatedDocumentCount) (int64, error) {
+func (wc *WrappedCollection) EstimatedDocumentCount(ctx context.Context, opts ...*options.EstimatedDocumentCountOptions) (int64, error) {
 	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Collection.EstimatedDocumentCount")
 	defer span.end(ctx)
 
@@ -141,7 +130,7 @@ func (wc *WrappedCollection) EstimatedDocumentCount(ctx context.Context, opts ..
 	return count, err
 }
 
-func (wc *WrappedCollection) Find(ctx context.Context, filter interface{}, opts ...findopt.Find) (mongo.Cursor, error) {
+func (wc *WrappedCollection) Find(ctx context.Context, filter interface{}, opts ...*options.FindOptions) (mongo.Cursor, error) {
 	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Collection.Find")
 	defer span.end(ctx)
 
@@ -152,28 +141,28 @@ func (wc *WrappedCollection) Find(ctx context.Context, filter interface{}, opts 
 	return cur, err
 }
 
-func (wc *WrappedCollection) FindOne(ctx context.Context, filter interface{}, opts ...findopt.One) *mongo.DocumentResult {
+func (wc *WrappedCollection) FindOne(ctx context.Context, filter interface{}, opts ...*options.FindOneOptions) *mongo.SingleResult {
 	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Collection.FindOne")
 	defer span.end(ctx)
 
 	return wc.coll.FindOne(ctx, filter, opts...)
 }
 
-func (wc *WrappedCollection) FindOneAndDelete(ctx context.Context, filter interface{}, opts ...findopt.DeleteOne) *mongo.DocumentResult {
+func (wc *WrappedCollection) FindOneAndDelete(ctx context.Context, filter interface{}, opts ...*options.FindOneAndDeleteOptions) *mongo.SingleResult {
 	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Collection.FindOneAndDelete")
 	defer span.end(ctx)
 
 	return wc.coll.FindOneAndDelete(ctx, filter, opts...)
 }
 
-func (wc *WrappedCollection) FindOneAndReplace(ctx context.Context, filter, replacement interface{}, opts ...findopt.ReplaceOne) *mongo.DocumentResult {
+func (wc *WrappedCollection) FindOneAndReplace(ctx context.Context, filter, replacement interface{}, opts ...*options.FindOneAndReplaceOptions) *mongo.SingleResult {
 	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Collection.FindOneAndReplace")
 	defer span.end(ctx)
 
 	return wc.coll.FindOneAndReplace(ctx, filter, replacement, opts...)
 }
 
-func (wc *WrappedCollection) FindOneAndUpdate(ctx context.Context, filter, update interface{}, opts ...findopt.UpdateOne) *mongo.DocumentResult {
+func (wc *WrappedCollection) FindOneAndUpdate(ctx context.Context, filter, update interface{}, opts ...*options.FindOneAndUpdateOptions) *mongo.SingleResult {
 	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Collection.FindOneAndUpdate")
 	defer span.end(ctx)
 
@@ -182,7 +171,7 @@ func (wc *WrappedCollection) FindOneAndUpdate(ctx context.Context, filter, updat
 
 func (wc *WrappedCollection) Indexes() mongo.IndexView { return wc.coll.Indexes() }
 
-func (wc *WrappedCollection) InsertMany(ctx context.Context, documents []interface{}, opts ...insertopt.Many) (*mongo.InsertManyResult, error) {
+func (wc *WrappedCollection) InsertMany(ctx context.Context, documents []interface{}, opts ...*options.InsertManyOptions) (*mongo.InsertManyResult, error) {
 	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Collection.InsertMany")
 	defer span.end(ctx)
 
@@ -193,7 +182,7 @@ func (wc *WrappedCollection) InsertMany(ctx context.Context, documents []interfa
 	return insmres, err
 }
 
-func (wc *WrappedCollection) InsertOne(ctx context.Context, document interface{}, opts ...insertopt.One) (*mongo.InsertOneResult, error) {
+func (wc *WrappedCollection) InsertOne(ctx context.Context, document interface{}, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
 	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Collection.InsertOne")
 	defer span.end(ctx)
 
@@ -206,7 +195,7 @@ func (wc *WrappedCollection) InsertOne(ctx context.Context, document interface{}
 
 func (wc *WrappedCollection) Name() string { return wc.coll.Name() }
 
-func (wc *WrappedCollection) ReplaceOne(ctx context.Context, filter, replacement interface{}, opts ...replaceopt.Replace) (*mongo.UpdateResult, error) {
+func (wc *WrappedCollection) ReplaceOne(ctx context.Context, filter, replacement interface{}, opts ...*options.ReplaceOptions) (*mongo.UpdateResult, error) {
 	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Collection.ReplaceOne")
 	defer span.end(ctx)
 
@@ -217,7 +206,7 @@ func (wc *WrappedCollection) ReplaceOne(ctx context.Context, filter, replacement
 	return repres, err
 }
 
-func (wc *WrappedCollection) UpdateMany(ctx context.Context, filter, replacement interface{}, opts ...updateopt.Update) (*mongo.UpdateResult, error) {
+func (wc *WrappedCollection) UpdateMany(ctx context.Context, filter, replacement interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
 	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Collection.UpdateMany")
 	defer span.end(ctx)
 
@@ -228,7 +217,7 @@ func (wc *WrappedCollection) UpdateMany(ctx context.Context, filter, replacement
 	return umres, err
 }
 
-func (wc *WrappedCollection) UpdateOne(ctx context.Context, filter, replacement interface{}, opts ...updateopt.Update) (*mongo.UpdateResult, error) {
+func (wc *WrappedCollection) UpdateOne(ctx context.Context, filter, replacement interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
 	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Collection.UpdateOne")
 	defer span.end(ctx)
 
@@ -239,7 +228,7 @@ func (wc *WrappedCollection) UpdateOne(ctx context.Context, filter, replacement 
 	return uores, err
 }
 
-func (wc *WrappedCollection) Watch(ctx context.Context, pipeline interface{}, opts ...changestreamopt.ChangeStream) (mongo.Cursor, error) {
+func (wc *WrappedCollection) Watch(ctx context.Context, pipeline interface{}, opts ...*options.ChangeStreamOptions) (mongo.Cursor, error) {
 	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Collection.Watch")
 	defer span.end(ctx)
 

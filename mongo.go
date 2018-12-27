@@ -18,10 +18,10 @@ import (
 	"context"
 
 	"github.com/mongodb/mongo-go-driver/mongo"
-	"github.com/mongodb/mongo-go-driver/mongo/clientopt"
+	"github.com/mongodb/mongo-go-driver/mongo/options"
 )
 
-func Connect(ctx context.Context, uri string, opts ...clientopt.Option) (*WrappedClient, error) {
+func Connect(ctx context.Context, uri string, opts ...*options.ClientOptions) (*WrappedClient, error) {
 	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Connect")
 	defer span.end(ctx)
 
