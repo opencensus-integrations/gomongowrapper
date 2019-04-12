@@ -18,11 +18,11 @@ import (
 	"context"
 	"sync"
 
-	"github.com/mongodb/mongo-go-driver/mongo"
-	"github.com/mongodb/mongo-go-driver/mongo/options"
-	"github.com/mongodb/mongo-go-driver/mongo/readconcern"
-	"github.com/mongodb/mongo-go-driver/mongo/readpref"
-	"github.com/mongodb/mongo-go-driver/mongo/writeconcern"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readconcern"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"go.mongodb.org/mongo-driver/mongo/writeconcern"
 )
 
 type WrappedDatabase struct {
@@ -53,7 +53,7 @@ func (wd *WrappedDatabase) Collection(name string, opts ...*options.CollectionOp
 }
 
 func (wd *WrappedDatabase) Drop(ctx context.Context) error {
-	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Database.Drop")
+	ctx, span := roundtripTrackingSpan(ctx, "go.mongodb.org/mongo-driver.Database.Drop")
 	defer span.end(ctx)
 
 	err := wd.db.Drop(ctx)
@@ -63,8 +63,8 @@ func (wd *WrappedDatabase) Drop(ctx context.Context) error {
 	return err
 }
 
-func (wd *WrappedDatabase) ListCollections(ctx context.Context, filter interface{}, opts ...*options.ListCollectionsOptions) (mongo.Cursor, error) {
-	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Database.ListCollections")
+func (wd *WrappedDatabase) ListCollections(ctx context.Context, filter interface{}, opts ...*options.ListCollectionsOptions) (*mongo.Cursor, error) {
+	ctx, span := roundtripTrackingSpan(ctx, "go.mongodb.org/mongo-driver.Database.ListCollections")
 	defer span.end(ctx)
 
 	cur, err := wd.db.ListCollections(ctx, filter, opts...)
@@ -79,7 +79,7 @@ func (wd *WrappedDatabase) ReadConcern() *readconcern.ReadConcern { return wd.db
 func (wd *WrappedDatabase) ReadPreference() *readpref.ReadPref    { return wd.db.ReadPreference() }
 
 func (wd *WrappedDatabase) RunCommand(ctx context.Context, runCommand interface{}, opts ...*options.RunCmdOptions) *mongo.SingleResult {
-	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Database.RunCommand")
+	ctx, span := roundtripTrackingSpan(ctx, "go.mongodb.org/mongo-driver.Database.RunCommand")
 	defer span.end(ctx)
 
 	return wd.db.RunCommand(ctx, runCommand, opts...)

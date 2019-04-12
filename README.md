@@ -17,7 +17,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/mongodb/mongo-go-driver/bson"
+	"go.mongodb.org/mongo-driver/bson"
 
 	"github.com/opencensus-integrations/gomongowrapper"
 
