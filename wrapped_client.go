@@ -17,18 +17,17 @@ package mongowrapper
 import (
 	"context"
 
-	"github.com/mongodb/mongo-go-driver/mongo"
-	"github.com/mongodb/mongo-go-driver/mongo/options"
-	"github.com/mongodb/mongo-go-driver/mongo/readpref"
-	"github.com/mongodb/mongo-go-driver/x/mongo/driver/session"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
 type WrappedClient struct {
 	cc *mongo.Client
 }
 
-func NewClient(uri string) (*WrappedClient, error) {
-	client, err := mongo.NewClient(uri)
+func NewClient(opts ...*options.ClientOptions) (*WrappedClient, error) {
+	client, err := mongo.NewClient(opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +35,7 @@ func NewClient(uri string) (*WrappedClient, error) {
 }
 
 func (wc *WrappedClient) Connect(ctx context.Context) error {
-	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Client.Connect")
+	ctx, span := roundtripTrackingSpan(ctx, "go.mongodb.org/mongo-driver.Client.Connect")
 	defer span.end(ctx)
 
 	err := wc.cc.Connect(ctx)
@@ -45,8 +44,6 @@ func (wc *WrappedClient) Connect(ctx context.Context) error {
 	}
 	return err
 }
-
-func (wc *WrappedClient) ConnectionString() string { return wc.cc.ConnectionString() }
 
 func (wc *WrappedClient) Database(name string, opts ...*options.DatabaseOptions) *WrappedDatabase {
 	db := wc.cc.Database(name, opts...)
@@ -57,7 +54,7 @@ func (wc *WrappedClient) Database(name string, opts ...*options.DatabaseOptions)
 }
 
 func (wc *WrappedClient) Disconnect(ctx context.Context) error {
-	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Client.Disconnect")
+	ctx, span := roundtripTrackingSpan(ctx, "go.mongodb.org/mongo-driver.Client.Disconnect")
 	defer span.end(ctx)
 
 	err := wc.cc.Disconnect(ctx)
@@ -68,7 +65,7 @@ func (wc *WrappedClient) Disconnect(ctx context.Context) error {
 }
 
 func (wc *WrappedClient) ListDatabaseNames(ctx context.Context, filter interface{}, opts ...*options.ListDatabasesOptions) ([]string, error) {
-	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Client.ListDatabaseNames")
+	ctx, span := roundtripTrackingSpan(ctx, "go.mongodb.org/mongo-driver.Client.ListDatabaseNames")
 	defer span.end(ctx)
 
 	dbs, err := wc.cc.ListDatabaseNames(ctx, filter, opts...)
@@ -79,7 +76,7 @@ func (wc *WrappedClient) ListDatabaseNames(ctx context.Context, filter interface
 }
 
 func (wc *WrappedClient) ListDatabases(ctx context.Context, filter interface{}, opts ...*options.ListDatabasesOptions) (mongo.ListDatabasesResult, error) {
-	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Client.ListDatabases")
+	ctx, span := roundtripTrackingSpan(ctx, "go.mongodb.org/mongo-driver.Client.ListDatabases")
 	defer span.end(ctx)
 
 	dbr, err := wc.cc.ListDatabases(ctx, filter, opts...)
@@ -90,7 +87,7 @@ func (wc *WrappedClient) ListDatabases(ctx context.Context, filter interface{}, 
 }
 
 func (wc *WrappedClient) Ping(ctx context.Context, rp *readpref.ReadPref) error {
-	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Client.Ping")
+	ctx, span := roundtripTrackingSpan(ctx, "go.mongodb.org/mongo-driver.Client.Ping")
 	defer span.end(ctx)
 
 	err := wc.cc.Ping(ctx, rp)
@@ -114,10 +111,6 @@ func (wc *WrappedClient) UseSession(ctx context.Context, fn func(mongo.SessionCo
 
 func (wc *WrappedClient) UseSessionWithOptions(ctx context.Context, opts *options.SessionOptions, fn func(mongo.SessionContext) error) error {
 	return wc.cc.UseSessionWithOptions(ctx, opts, fn)
-}
-
-func (wc *WrappedClient) ValidSession(sess *session.Client) error {
-	return wc.cc.ValidSession(sess)
 }
 
 func (wc *WrappedClient) Client() *mongo.Client { return wc.cc }

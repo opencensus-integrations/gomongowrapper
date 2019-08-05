@@ -17,24 +17,24 @@ package mongowrapper
 import (
 	"context"
 
-	"github.com/mongodb/mongo-go-driver/mongo"
-	"github.com/mongodb/mongo-go-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func Connect(ctx context.Context, uri string, opts ...*options.ClientOptions) (*WrappedClient, error) {
-	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Connect")
+func Connect(ctx context.Context, opts ...*options.ClientOptions) (*WrappedClient, error) {
+	ctx, span := roundtripTrackingSpan(ctx, "go.mongodb.org/mongo-driver.Connect")
 	defer span.end(ctx)
 
-	cc, err := mongo.NewClientWithOptions(uri, opts...)
+	cc, err := mongo.NewClient(opts...)
 	if err != nil {
 		span.setError(err)
 		return nil, err
 	}
 
 	wc := &WrappedClient{cc: cc}
-	err = wc.Connect(ctx)
-	if err != nil {
+	if err := wc.Connect(ctx); err != nil {
 		span.setError(err)
 	}
+
 	return wc, err
 }
