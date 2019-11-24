@@ -17,10 +17,10 @@ package mongowrapper
 import (
 	"context"
 
-	"github.com/mongodb/mongo-go-driver/bson"
-	"github.com/mongodb/mongo-go-driver/bson/primitive"
-	"github.com/mongodb/mongo-go-driver/mongo"
-	"github.com/mongodb/mongo-go-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type WrappedSession struct {
@@ -30,7 +30,7 @@ type WrappedSession struct {
 var _ mongo.Session = (*WrappedSession)(nil)
 
 func (ws *WrappedSession) EndSession(ctx context.Context) {
-	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Session.EndSession")
+	ctx, span := roundtripTrackingSpan(ctx, "go.mongodb.org/mongo-driver.Session.EndSession")
 	defer span.end(ctx)
 
 	ws.Session.EndSession(ctx)
@@ -41,7 +41,7 @@ func (ws *WrappedSession) StartTransaction(topts ...*options.TransactionOptions)
 }
 
 func (ws *WrappedSession) AbortTransaction(ctx context.Context) error {
-	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Session.AbortTransaction")
+	ctx, span := roundtripTrackingSpan(ctx, "go.mongodb.org/mongo-driver.Session.AbortTransaction")
 	defer span.end(ctx)
 
 	err := ws.Session.AbortTransaction(ctx)
@@ -52,7 +52,7 @@ func (ws *WrappedSession) AbortTransaction(ctx context.Context) error {
 }
 
 func (ws *WrappedSession) CommitTransaction(ctx context.Context) error {
-	ctx, span := roundtripTrackingSpan(ctx, "github.com/mongodb/mongo-go-driver.Session.CommitTransaction")
+	ctx, span := roundtripTrackingSpan(ctx, "go.mongodb.org/mongo-driver.Session.CommitTransaction")
 	defer span.end(ctx)
 
 	err := ws.Session.CommitTransaction(ctx)

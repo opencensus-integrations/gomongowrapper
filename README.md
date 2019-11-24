@@ -3,7 +3,7 @@ MongoDB Go wrapper source code
 
 ## Table of contents
 - [End to end example](#end-to-end-example)
-- [Traces](#traces)y
+- [Traces](#traces)
 - [Metrics](#metrics)
 
 ## End to end example
@@ -17,9 +17,11 @@ import (
 	"log"
 	"time"
 
-	"github.com/mongodb/mongo-go-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/opencensus-integrations/gomongowrapper"
+	"go.mongodb.org/mongo-driver/bson"
+
+	mongowrapper "github.com/opencensus-integrations/gomongowrapper"
 
 	"contrib.go.opencensus.io/exporter/stackdriver"
 	"go.opencensus.io/stats/view"
@@ -53,7 +55,7 @@ func main() {
 
         // Now for the mongo connections, using the context
         // with the span in it for continuity.
-	client, err := mongowrapper.NewClient("mongodb://localhost:27017")
+	client, err := mongowrapper.NewClient(options.Client().ApplyURI("mongodb://localhost:27017"))
 	if err != nil {
 		log.Fatalf("Failed to create the new client: %v", err)
 	}
